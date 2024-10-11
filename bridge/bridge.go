@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	dockerapi "github.com/fsouza/go-dockerclient"
 )
@@ -51,6 +52,10 @@ func (b *Bridge) Ping() error {
 }
 
 func (b *Bridge) Add(containerId string) {
+	// Give Docker more time to assign host ports for the container's ephemeral ports. Without this
+	// sleep, an ephemeral port may be ignored if Docker hasn't finished assigning a host port yet
+	time.Sleep(1 * time.Second)
+
 	b.Lock()
 	defer b.Unlock()
 	b.add(containerId, false)
